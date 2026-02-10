@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import matplotlib
 
 try:
@@ -31,7 +32,7 @@ def mandelbrot_vectorized(xmin, xmax, ymin, ymax, height, width, max_iter):
     
     X, Y = np.meshgrid(x, y)
     C = X + Y*1j #fancy complex matrix (in python 1j represents imaginary unit)
-    
+
     Z = np.zeros(C.shape, dtype=complex)
     
     mandelbrot_set = np.zeros(C.shape, dtype=int)
@@ -47,14 +48,31 @@ def mandelbrot_vectorized(xmin, xmax, ymin, ymax, height, width, max_iter):
     return mandelbrot_set
     
 
+def stopwatch(func, *args):
+    start = time.perf_counter()
+    result = func(*args)
+    elapsed = time.perf_counter() - start
+    print(f"{func.__name__}: {elapsed:.4f} seconds")
+    return result
+
+
 if __name__ == '__main__':
     max_iter = 100
     xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
     height, width = 1024, 1024  
 
-    mandelbrot_set = mandelbrot_vectorized(xmin, xmax, ymin, ymax, height, width, max_iter)
+    params = (xmin, xmax, ymin, ymax, height, width, max_iter)
 
-    plt.imshow(mandelbrot_set, cmap='magma', extent=[xmin, xmax, ymin, ymax])
-    plt.colorbar()
-    plt.title("Mandelbrot Set")
+    naive_set = stopwatch(mandelbrot_naive, *params)
+    vectorized_set = stopwatch(mandelbrot_vectorized, *params)
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    axes[0].imshow(naive_set, cmap='magma', extent=[xmin, xmax, ymin, ymax])
+    axes[0].set_title("Naive")
+
+    axes[1].imshow(vectorized_set, cmap='magma', extent=[xmin, xmax, ymin, ymax])
+    axes[1].set_title("Vectorized")
+
+    plt.tight_layout()
     plt.show()
