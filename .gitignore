@@ -1,2 +1,4 @@
 # Ignore specific project folders
 venv/
+__pycache__/
+*.pyc
