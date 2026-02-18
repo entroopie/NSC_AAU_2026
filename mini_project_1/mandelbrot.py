@@ -3,6 +3,7 @@ import time
 import matplotlib
 
 from interactive_plot import interactive_plot
+import matplotlib.pyplot as plt
 
 
 def naive(xmin, xmax, ymin, ymax, height, width, max_iter):
