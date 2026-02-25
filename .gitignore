@@ -2,3 +2,5 @@
 venv/
 __pycache__/
 *.pyc
+Lecture_2_code.ipynb
+exercises/
