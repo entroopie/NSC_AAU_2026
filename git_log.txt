@@ -1,0 +1,75 @@
+2026-03-11 5dd3276 Delete mini_project_1/mandelbrot.py
+
+ mini_project_1/mandelbrot.py | 31 -------------------------------
+ 1 file changed, 31 deletions(-)
+2026-03-11 d4ced27 Merge branch 'main' of github.com:entroopie/NSC_AAU_2026
+2026-03-11 d2c9db4 Added the results of execution
+
+ benchmark_results.csv   |  26 ++++++++++++++++++++++++++
+ performance_scaling.png | Bin 0 -> 134775 bytes
+ 2 files changed, 26 insertions(+)
+2026-03-11 5ad5f4c added performance analysis (main file)
+
+ mini_project_1/performance_analysis.py | 113 +++++++++++++++++++++++++++++++++
+ 1 file changed, 113 insertions(+)
+2026-03-11 0f1c1cf Added report
+
+ mini_project_1/report.md | 219 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 219 insertions(+)
+2026-03-11 2239007 rename and config setup for perf analysis
+
+ mini_project_1/config.py          |  5 ++++-
+ mini_project_1/mandelbrot_test.py | 30 ++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+), 1 deletion(-)
+2026-03-11 fbe0fa4 Delete exercises directory
+
+ exercises/ex.py | 75 ---------------------------------------------------------
+ 1 file changed, 75 deletions(-)
+2026-02-25 8400b02 Added numba +  project structure refactor
+
+ mini_project_1/config.py                       |  6 ++
+ mini_project_1/mandelbrot.py                   | 79 ++++++--------------------
+ mini_project_1/utils/__init__.py               |  0
+ mini_project_1/utils/classic_plot.py           |  7 +++
+ mini_project_1/utils/functions.py              | 67 ++++++++++++++++++++++
+ mini_project_1/{ => utils}/interactive_plot.py |  1 -
+ 6 files changed, 97 insertions(+), 63 deletions(-)
+2026-02-25 1f67d04 update gitignore
+
+ .gitignore | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+2026-02-18 3afb02f quick fix
+
+ mini_project_1/mandelbrot.py | 1 +
+ 1 file changed, 1 insertion(+)
+2026-02-18 5376558 Added interactive mandelbrot
+
+ mini_project_1/interactive_plot.py | 87 ++++++++++++++++++++++++++++++++++++++
+ mini_project_1/mandelbrot.py       | 35 +++++++--------
+ 2 files changed, 103 insertions(+), 19 deletions(-)
+2026-02-18 76d9398 update gitignore
+
+ .gitignore | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+2026-02-10 3b430c2 add stopwatch + convert to subplots
+
+ mini_project_1/mandelbrot.py | 28 +++++++++++++++++++++++-----
+ 1 file changed, 23 insertions(+), 5 deletions(-)
+2026-02-10 c8f6e92 added vectorized operations
+
+ mini_project_1/mandelbrot.py | 38 ++++++++++++++++++++++++++++++--------
+ 1 file changed, 30 insertions(+), 8 deletions(-)
+2026-02-10 0ada784 update gitignore
+
+ .gitignore | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+2026-02-10 b95b558 init mandelbrot file
+
+ .gitignore                   |  2 +-
+ mini_project_1/mandelbrot.py | 38 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 39 insertions(+), 1 deletion(-)
+2026-02-10 3e65127 Initial commit
+
+ .gitignore      |  2 ++
+ exercises/ex.py | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 77 insertions(+)
