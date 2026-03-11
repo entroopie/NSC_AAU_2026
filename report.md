@@ -33,7 +33,7 @@ for comparing different Python computing strategies.
 
 Three methods were implemented, each representing a common pattern in numerical Python.
 
-### 2.1 Naïve (Pure Python loops)
+### 2.1 Naive (Pure Python loops)
 
 ```python
 for i in range(height):
@@ -99,7 +99,7 @@ def numba(xmin, xmax, ymin, ymax, height, width, max_iter):
 
 The `@njit` decorator from Numba compiles the function to native machine code the
 first time it is called (just-in-time compilation). The code structure is identical
-to the naïve version - nested loops, scalar arithmetic - but it runs at C-like speed.
+to the Naive version - nested loops, scalar arithmetic - but it runs at C-like speed.
 
 Here the `z.real**2 + z.imag**2 <= 4` check *does* pay off: in compiled code,
 avoiding a square root is a concrete gain. Similarly, `z * z` is used instead of
@@ -112,14 +112,14 @@ any timing begins.
 
 ## 3. Benchmarking Methodology
 
-- **Grid sizes:** 64, 128, 256, 512, 1024, 2048, 4096 (each an N×N grid).
-  The naïve method is included at all sizes but becomes very slow at the largest.
+- **Grid sizes:** 64, 128, 256, 512, 1024, 2048, 4096 (each an NxN grid).
+  The Naive method is included at all sizes but becomes very slow at the largest.
 - **Timing:** `time.perf_counter()` - wall-clock time with the highest resolution
   available on the system.
 - **Single run per size:** one timed execution per (method, size) combination.
-  The naïve method is deterministic and its runtimes are very stable, so a single
+  The Naive method is deterministic and its runtimes are very stable, so a single
   measurement is representative.
-- **Numba warm-up:** the JIT compiler is triggered on a tiny 32×32 grid before any
+- **Numba warm-up:** the JIT compiler is triggered on a tiny 32x32 grid before any
   measurements, so compilation time is excluded from the results.
 - **Results saved:** all timings are written to `benchmark_results.csv` alongside
   derived throughput (million pixels per second).
@@ -130,46 +130,33 @@ any timing begins.
 
 ### 4.1 Raw timings (seconds)
 
-| Grid size | Pixels | Naïve (s) | Vectorized (s) | Numba (s) |
+| Grid size | Pixels | Naive (s) | Vectorized (s) | Numba (s) |
 |-----------|--------|-----------|----------------|-----------|
-| 64×64 | 4 096 | 0.0327 | 0.0029 | 0.0004 |
-| 128×128 | 16 384 | 0.1282 | 0.0082 | 0.0015 |
-| 256×256 | 65 536 | 0.5175 | 0.0346 | 0.0062 |
-| 512×512 | 262 144 | 2.0653 | 0.1262 | 0.0269 |
-| 1024×1024 | 1 048 576 | 5.6283 | 0.7288 | 0.1001 |
-| 2048×2048 | 4 194 304 | 25.8827 | 3.7981 | 0.3874 |
-| 4096×4096 | 16 777 216 | 103.1887 | 16.7817 | 1.5300 |
+| 64x64 | 4 096 | 0.0327 | 0.0029 | 0.0004 |
+| 128x128 | 16 384 | 0.1282 | 0.0082 | 0.0015 |
+| 256x256 | 65 536 | 0.5175 | 0.0346 | 0.0062 |
+| 512x512 | 262 144 | 2.0653 | 0.1262 | 0.0269 |
+| 1024x1024 | 1 048 576 | 5.6283 | 0.7288 | 0.1001 |
+| 2048x2048 | 4 194 304 | 25.8827 | 3.7981 | 0.3874 |
+| 4096x4096 | 16 777 216 | 103.1887 | 16.7817 | 1.5300 |
 
-### 4.2 Throughput (million pixels per second)
-
-| Method | Typical throughput |
-|--------|--------------------|
-| Naïve | ~0.13 Mpx/s |
-| Vectorized | ~1.0–2.1 Mpx/s |
-| Numba | ~10–11 Mpx/s |
-
-Numba achieves roughly **constant throughput** across all grid sizes (~10 Mpx/s),
-which is a hallmark of a method that is compute-bound with no overhead growing
-with size. Vectorized throughput drops slightly at larger sizes, likely due to
-increased memory pressure as the full complex array no longer fits in cache.
-
-### 4.3 Speedup over naïve
+### 4.2 Speedup over Naive
 
 | Grid size | Vectorized speedup | Numba speedup |
 |-----------|--------------------|---------------|
-| 64×64 | 11× | 83× |
-| 512×512 | 16× | 77× |
-| 4096×4096 | 6× | 67× |
+| 64x64 | 11x | 83x |
+| 512x512 | 16x | 77x |
+| 4096x4096 | 6x | 67x |
 
 ---
 
 ## 5. Interpretation
 
-### Why is Naïve so slow?
+### Why is Naive so slow?
 
 Python executes each operation one at a time through its interpreter. Every
 arithmetic step - `z ** 2`, `z + c`, `abs(z)` - involves Python object
-allocation, type checking, and function dispatch. For a 4096×4096 grid with
+allocation, type checking, and function dispatch. For a 4096x4096 grid with
 up to 256 iterations per pixel, this adds up to billions of such overhead events.
 
 ### Why does Vectorized help?
@@ -187,7 +174,7 @@ as a point escapes.
 
 ### Why is Numba the fastest?
 
-Numba compiles the exact same loop structure as the naïve version to native machine
+Numba compiles the exact same loop structure as the Naive version to native machine
 code. The CPU can execute it with full SIMD and branch-prediction optimisation,
 just like a hand-written C program. Additionally, Numba's per-pixel `while` loop
 exits early when a point escapes, skipping all remaining iterations - something
@@ -197,7 +184,7 @@ it is purely compute-limited.
 
 ### Scaling behaviour
 
-All three methods scale approximately as **O(N²)** - doubling the grid size
+All three methods scale approximately as **O(N^2)** - doubling the grid size
 quadruples the number of pixels and therefore roughly quadruples the runtime.
 This is visible in the log-log plot as straight, parallel lines. The difference
 between methods is a constant factor (the slope is the same; the intercept differs),
@@ -209,11 +196,11 @@ not a difference in algorithmic complexity.
 
 | Method | Best for | Drawback |
 |--------|----------|----------|
-| Naïve | Clarity, teaching | Very slow |
+| Naive | Easy to implement | Very slow |
 | Vectorized | No extra dependencies | Memory pressure at large sizes |
 | Numba | Production speed | Requires compilation warm-up |
 
-For interactive or production use, Numba is the clear winner - roughly **70× faster**
-than naïve and **10× faster** than vectorized at typical grid sizes, with no change
+For interactive or production use, Numba is the clear winner - roughly **70x faster**
+than Naive and **10x faster** than vectorized at typical grid sizes, with no change
 to the algorithm's logic. Vectorized NumPy is a good middle ground when Numba is not
 available or the grid is small.
