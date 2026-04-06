@@ -11,16 +11,13 @@ if __name__ == '__main__':
     config = Config()
     params = (config.xmin, config.xmax, config.ymin, config.ymax, config.height, config.width, config.max_iter)
     # From utils.functions
-    functions = [naive, vectorized, numba]
+    functions = [numba]
 
     # warm up numba
     numba(*params)
 
     for func in functions:
         stopwatch(func, *params)
-
-
-
 
 
     # Plotting

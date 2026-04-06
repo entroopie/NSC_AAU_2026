@@ -41,7 +41,7 @@ def interactive_plot(xmin, xmax, ymin, ymax, height, width, max_iter, compute_fu
 
     def draw(xmin, xmax, ymin, ymax):
         zoom_level = original_x_span / (xmax - xmin)
-        current_max_iter = int(max_iter + 150 * np.log2(max(zoom_level, 1)))
+        current_max_iter = int(max_iter * max(1.0, np.log2(zoom_level) + 1))
         mandelbrot_set = compute_func(xmin, xmax, ymin, ymax, height, width, current_max_iter)
         ax.clear()
         ax.imshow(mandelbrot_set, cmap='magma', extent=[xmin, xmax, ymin, ymax])
@@ -70,7 +70,7 @@ def interactive_plot(xmin, xmax, ymin, ymax, height, width, max_iter, compute_fu
 
         # Auto-seek the boundary within the zoomed region
         zoom_level = original_x_span / x_span
-        search_iter = int(max_iter + 150 * np.log2(max(zoom_level, 1)))
+        search_iter = int(max_iter * max(1.0, np.log2(zoom_level) + 1))
         bcx, bcy = find_boundary(compute_func, new_xmin, new_xmax, new_ymin, new_ymax, search_iter)
 
         # Re-center on the most interesting point
