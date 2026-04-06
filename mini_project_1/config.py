@@ -2,8 +2,13 @@ class Config:
     def __init__(self):
         self.xmin, self.xmax, self.ymin, self.ymax = -2.0, 1.0, -1.5, 1.5
         self.width, self.height = 512, 512
-        self.max_iter = 256
+        self.max_iter = 100
 
         # performance analysis
         self.SIZES_NAIVE = [64, 128, 256, 512, 1024, 2048, 4096]
         self.SIZES_FAST  = [64, 128, 256, 512, 1024, 2048, 4096]
+        # parallel benchmark defaults
+        self.MP_PROCESSES = 4
+        self.MP_CHUNK_ROWS = 64
+        self.DASK_LOCAL_WORKERS = 4
+        self.DASK_CHUNK_ROWS = 64
