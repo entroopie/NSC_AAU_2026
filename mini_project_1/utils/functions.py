@@ -65,3 +65,22 @@ def numba(xmin, xmax, ymin, ymax, height, width, max_iter):
             mandelbrot_set[i, j] = n
 
     return mandelbrot_set
+
+def vectorized_block(y_block, x, max_iter):
+    """Vectorized Mandelbrot for a row block (used by multiprocessing and Dask)."""
+    C = x[np.newaxis, :] + 1j * y_block[:, np.newaxis]
+    Z = np.zeros(C.shape, dtype=np.complex128)
+    mandelbrot_set = np.zeros(C.shape, dtype=np.int32)
+    mask = np.ones(C.shape, dtype=bool)
+
+    for n in range(max_iter):
+        Z[mask] = Z[mask] * Z[mask] + C[mask]
+        escape = mask & (np.abs(Z) > 2)
+        mandelbrot_set[escape] = n
+        mask[escape] = False
+        if not mask.any():
+            break
+
+    mandelbrot_set[mask] = max_iter
+    return mandelbrot_set
+
