@@ -1,0 +1,7 @@
+size,max_iter,block_x,block_y,threads_per_block_total,warp_multiple,grid_x,grid_y,kernel_ms,end_to_end_s,cpu_numba_s,speedup_vs_cpu_kernel_only,speedup_vs_cpu_end_to_end,correct_vs_cpu_numba
+512,256,8,8,64,True,64,64,0.3961,0.00093,0.035522,89.6793,38.1776,False
+512,256,10,10,100,False,52,52,0.5681,0.000979,0.035522,62.5275,36.285,False
+512,256,16,8,128,True,32,64,0.3941,0.000806,0.035522,90.1307,44.0505,False
+512,256,16,16,256,True,32,32,0.6513,0.001187,0.035522,54.5425,29.9179,False
+512,256,32,8,256,True,16,64,0.7332,0.001155,0.035522,48.4484,30.7539,False
+512,256,32,16,512,True,16,32,0.7433,0.001204,0.035522,47.7893,29.5023,False

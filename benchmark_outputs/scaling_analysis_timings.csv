@@ -1,0 +1,55 @@
+suite,method,size,max_iter,repeat,time_s,correct_vs_cpu_numba,mismatch_ratio_vs_cpu_numba,note
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,128,256,3,0.618461,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,128,256,3,0.531306,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_naive,128,256,2,0.100581,True,0.0,
+scaling_cuda_r3_fixed,cpu_numba,128,256,3,0.002171,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,128,256,3,0.010843,True,0.0,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,128,256,3,0.000464,False,0.00097656,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,128,256,3,0.000102,False,0.00097656,kernel_only
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,256,256,3,0.699755,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,256,256,3,0.529756,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_naive,256,256,2,0.401962,True,0.0,
+scaling_cuda_r3_fixed,cpu_numba,256,256,3,0.008888,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,256,256,3,0.041466,True,0.0,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,256,256,3,0.000553,False,0.00115967,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,256,256,3,0.000217,False,0.00115967,kernel_only
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,512,256,3,0.792474,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,512,256,3,0.548547,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_naive,512,256,2,1.602081,True,0.0,
+scaling_cuda_r3_fixed,cpu_numba,512,256,3,0.034699,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,512,256,3,0.172069,True,0.0,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,512,256,3,0.000829,False,0.00130463,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,512,256,3,0.000397,False,0.00130463,kernel_only
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,1024,256,3,0.955336,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,1024,256,3,0.614072,True,0.0,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_numba,1024,256,3,0.139315,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,1024,256,3,0.684437,True,0.0,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,1024,256,3,0.001612,False,0.00124168,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,1024,256,3,0.000926,False,0.00124168,kernel_only
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,2048,256,3,1.523113,False,1.19e-06,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,2048,256,3,0.846596,False,2.4e-07,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_numba,2048,256,3,0.556124,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,2048,256,3,3.431526,False,2.4e-07,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,2048,256,3,0.004178,False,0.00128222,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,2048,256,3,0.002945,False,0.00128222,kernel_only
+scaling_cuda_r3_fixed,cpu_dask_processes_w4,4096,256,3,3.880975,False,4.11e-06,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_multiprocessing_p8,4096,256,3,1.79675,False,4.2e-07,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_r3_fixed,cpu_numba,4096,256,3,2.275016,True,0.0,
+scaling_cuda_r3_fixed,cpu_numpy_vectorized,4096,256,3,17.58673,False,4.2e-07,escape-index convention adjusted
+scaling_cuda_r3_fixed,cuda_e2e_float32_16x8,4096,256,3,0.016401,False,0.00128376,includes H2D+D2H
+scaling_cuda_r3_fixed,cuda_kernel_float32_16x8,4096,256,3,0.010801,False,0.00128376,kernel_only
+scaling_cuda_large_r1,cpu_dask_processes_w4,6144,256,1,7.798217,False,5.78e-06,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_multiprocessing_p8,6144,256,1,3.323422,False,4.8e-07,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_numba,6144,256,1,5.097211,True,0.0,
+scaling_cuda_large_r1,cuda_e2e_float32_16x8,6144,256,1,0.03925,False,0.00127798,includes H2D+D2H
+scaling_cuda_large_r1,cuda_kernel_float32_16x8,6144,256,1,0.024012,False,0.00127798,kernel_only
+scaling_cuda_large_r1,cpu_dask_processes_w4,8192,256,1,12.789853,False,1.85e-06,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_multiprocessing_p8,8192,256,1,5.415315,False,3.6e-07,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_numba,8192,256,1,9.055477,True,0.0,
+scaling_cuda_large_r1,cuda_e2e_float32_16x8,8192,256,1,0.070133,False,0.00127611,includes H2D+D2H
+scaling_cuda_large_r1,cuda_kernel_float32_16x8,8192,256,1,0.042417,False,0.00127611,kernel_only
+scaling_cuda_large_r1,cpu_dask_processes_w4,12288,256,1,26.164792,False,7.5e-06,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_multiprocessing_p8,12288,256,1,14.138216,False,5.4e-07,chunk_rows=32 (escape-index convention adjusted)
+scaling_cuda_large_r1,cpu_numba,12288,256,1,20.354264,True,0.0,
+scaling_cuda_large_r1,cuda_e2e_float32_16x8,12288,256,1,0.153619,False,0.00128261,includes H2D+D2H
+scaling_cuda_large_r1,cuda_kernel_float32_16x8,12288,256,1,0.094814,False,0.00128261,kernel_only

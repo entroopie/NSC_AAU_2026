@@ -1,0 +1,40 @@
+method,size,max_iter,repeat,time_s,correct_vs_cpu_numba,note
+cpu_numba,128,256,3,0.002178,True,
+cpu_naive,128,256,2,0.099173,True,
+cpu_numpy_vectorized,128,256,3,0.010748,False,
+cpu_multiprocessing_p8,128,256,3,0.52576,False,chunk_rows=32
+cpu_dask_processes_w4,128,256,3,0.621802,False,chunk_rows=32
+cuda_kernel_float32_16x8,128,256,3,0.000103,False,kernel_only
+cuda_e2e_float32_16x8,128,256,3,0.000459,False,includes H2D+D2H
+cpu_numba,256,256,3,0.00884,True,
+cpu_naive,256,256,2,0.39735,True,
+cpu_numpy_vectorized,256,256,3,0.041425,False,
+cpu_multiprocessing_p8,256,256,3,0.53003,False,chunk_rows=32
+cpu_dask_processes_w4,256,256,3,0.69688,False,chunk_rows=32
+cuda_kernel_float32_16x8,256,256,3,0.000213,False,kernel_only
+cuda_e2e_float32_16x8,256,256,3,0.000564,False,includes H2D+D2H
+cpu_numba,512,256,3,0.034676,True,
+cpu_naive,512,256,2,1.603592,True,
+cpu_numpy_vectorized,512,256,3,0.170789,False,
+cpu_multiprocessing_p8,512,256,3,0.551735,False,chunk_rows=32
+cpu_dask_processes_w4,512,256,3,0.795217,False,chunk_rows=32
+cuda_kernel_float32_16x8,512,256,3,0.000397,False,kernel_only
+cuda_e2e_float32_16x8,512,256,3,0.00082,False,includes H2D+D2H
+cpu_numba,1024,256,3,0.139297,True,
+cpu_numpy_vectorized,1024,256,3,0.689834,False,
+cpu_multiprocessing_p8,1024,256,3,0.613877,False,chunk_rows=32
+cpu_dask_processes_w4,1024,256,3,0.959028,False,chunk_rows=32
+cuda_kernel_float32_16x8,1024,256,3,0.000944,False,kernel_only
+cuda_e2e_float32_16x8,1024,256,3,0.001664,False,includes H2D+D2H
+cpu_numba,2048,256,3,0.556111,True,
+cpu_numpy_vectorized,2048,256,3,3.408229,False,
+cpu_multiprocessing_p8,2048,256,3,0.845994,False,chunk_rows=32
+cpu_dask_processes_w4,2048,256,3,1.497951,False,chunk_rows=32
+cuda_kernel_float32_16x8,2048,256,3,0.002937,False,kernel_only
+cuda_e2e_float32_16x8,2048,256,3,0.004295,False,includes H2D+D2H
+cpu_numba,4096,256,3,2.274396,True,
+cpu_numpy_vectorized,4096,256,3,17.524536,False,
+cpu_multiprocessing_p8,4096,256,3,1.78778,False,chunk_rows=32
+cpu_dask_processes_w4,4096,256,3,3.858232,False,chunk_rows=32
+cuda_kernel_float32_16x8,4096,256,3,0.010841,False,kernel_only
+cuda_e2e_float32_16x8,4096,256,3,0.016379,False,includes H2D+D2H

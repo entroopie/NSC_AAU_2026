@@ -1,0 +1,4 @@
+size,max_iter,scheduler,num_workers,chunk_rows,time_s,speedup_vs_numpy,correct_vs_numpy
+1024,256,processes,4,32,0.672262,1.0414,True
+1024,256,processes,4,64,0.8254,0.8482,True
+1024,256,processes,4,128,0.993278,0.7049,True

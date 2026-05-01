@@ -1,0 +1,6 @@
+method,time_s,speedup_vs_numpy,note
+numpy_vectorized,0.70012,1.0,derived baseline from CSV speedup columns
+multiprocessing_p8_chunk32,0.375476,1.8646,best row from multiprocessing_best_by_p.csv
+dask_processes_chunk32,0.672262,1.0414,best row from dask_local_chunk_scan.csv
+cuda_e2e_block16x8,0.001598,438.1229,best end_to_end_s from cuda_blocksize_scan.csv
+cuda_kernel_block8x8,0.000923,758.8559,best kernel_ms from cuda_blocksize_scan.csv
