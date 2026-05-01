@@ -1,206 +1,166 @@
-# Mandelbrot Set – Performance Scaling Report
+## Submission checklist
 
----
+- [x] Does the submission include docstrings for 2 or more functions, with full explanation of purpose and input/output variables?
+  - Evidence: [mini_project_1/utils/functions.py](mini_project_1/utils/functions.py)
+- [x] Does the code include unit testing based on Doctest, unittest, or py.test, for at least 3 test cases?
+  - Evidence: [mini_project_1/test_mandelbrot_unittest.py](mini_project_1/test_mandelbrot_unittest.py) (4 tests)
+- [x] Does the submission include a working CUDA/Numba implementation of the Mandelbrot algorithm?
+  - Evidence: [mini_project_1/cuda_numba_benchmark.py](mini_project_1/cuda_numba_benchmark.py)
+- [x] Does the CUDA implementation correctly use 2D grid/block configuration, including out-of-bounds checks, and discuss the effect of block size on performance?
+  - Evidence: kernel indexing + out-of-bounds guard in [mini_project_1/cuda_numba_benchmark.py](mini_project_1/cuda_numba_benchmark.py);
+    block-size sweep outputs [benchmark_outputs/cuda_blocksize_scan.csv](benchmark_outputs/cuda_blocksize_scan.csv) and [benchmark_outputs/cuda_blocksize_scan.png](benchmark_outputs/cuda_blocksize_scan.png)
+- [x] Do the code and worksheet include benchmarking and scaling results, comparing CUDA against previous implementations using consistent parameters and speedups?
+  - Evidence: scaling dataset [benchmark_outputs/scaling_analysis_timings.csv](benchmark_outputs/scaling_analysis_timings.csv) and scaling plots
+    [benchmark_outputs/scaling_cuda_r3_fixed/scaling_times.png](benchmark_outputs/scaling_cuda_r3_fixed/scaling_times.png),
+    [benchmark_outputs/scaling_cuda_large_r1/scaling_times.png](benchmark_outputs/scaling_cuda_large_r1/scaling_times.png)
+- [x] Does the worksheet discuss important CUDA-specific performance aspects, such as CPU-GPU data transfers, correct timing/synchronization, memory-type choices, and/or warp divergence?
+  - Evidence: [mini_project_1/cuda_notes.md](mini_project_1/cuda_notes.md)
+- [x] Does the submission include any extra features worth bonus points, such as shared-memory reduction, profiling, improved visualization, or comparison across devices? (If yes, please briefly describe them in comments)
+  - Yes (improved visualization): interactive Mandelbrot zoom explorer that auto-seeks a high-variance boundary sub-region when zooming.
+    Implemented in [mini_project_1/utils/interactive_plot.py](mini_project_1/utils/interactive_plot.py) and used from [mini_project_1/mandelbrot_test.py](mini_project_1/mandelbrot_test.py).
+
+# Mandelbrot Set – CPU vs CUDA Performance & Scaling Report
 
 ## 1. The Problem
 
-The Mandelbrot set is a classic fractal defined in the complex plane. For each point
-`c = x + iy`, we repeatedly apply the iteration:
+The Mandelbrot set is a classic fractal defined in the complex plane. For each point $c = x + iy$, we apply the iteration
 
-```
-z_(n+1) = z_n² + c,   z_0 = 0
-```
+$$z_{n+1} = z_n^2 + c, \quad z_0 = 0$$
 
-A point belongs to the Mandelbrot set if `|z|` never exceeds 2, no matter how many
-iterations we run. In practice we set a maximum iteration count (`max_iter`). If the
-point has not escaped after `max_iter` steps, we treat it as part of the set.
+and say that a point belongs to the set if $|z|$ never exceeds 2. In practice we cap the iteration count with `max_iter` and record the number of iterations before escape (or `max_iter` if it never escaped).
 
-Computing the Mandelbrot set for a full image grid is computationally expensive:
-every pixel is an independent, iterative calculation. This makes it a good benchmark
-for comparing different Python computing strategies.
+Mandelbrot is a good HPC benchmark because the work is embarrassingly parallel at the pixel level (each pixel is independent), while still having branch divergence (different pixels escape after different iteration counts).
 
-**Configuration used in all experiments:**
+**Common configuration used in the experiments:**
 
 | Parameter | Value |
-|-----------|-------|
+|---|---|
 | Domain | x ∈ [−2.0, 1.0], y ∈ [−1.5, 1.5] |
 | Max iterations | 256 |
-| Grid sizes tested | 64 – 4096 (powers of two) |
+| Primary scaling sizes | 128 – 4096 (repeat=3, median) |
+| Large scaling sizes | 6144, 8192, 12288 (repeat=1) |
+| CUDA thread block (2D) | 16x8 |
+| CUDA coordinate dtype | float32 (performance) |
 
----
 
 ## 2. Implementations
 
-Three methods were implemented, each representing a common pattern in numerical Python.
+### 2.1 Naive CPU (pure Python)
 
-### 2.1 Naive (Pure Python loops)
+Two nested Python loops over pixels + per-pixel `while` loop. This is the most readable baseline but extremely slow due to interpreter overhead.
 
-```python
-for i in range(height):
-    for j in range(width):
-        c = complex(x[j], y[i])
-        z = 0
-        n = 0
-        while n < max_iter and abs(z) <= 2:
-            z = z ** 2 + c
-            n += 1
-        mandelbrot_set[i, j] = n
-```
+### 2.2 NumPy vectorized CPU
 
-Two nested Python `for` loops iterate over every pixel. The inner iteration runs
-as pure Python bytecode. This is the simplest and most readable version, but the
-slowest: every arithmetic operation goes through Python's interpreter overhead.
+Builds a complex grid and iterates over the whole grid using NumPy array operations plus a boolean mask. This reduces Python overhead but uses large intermediate arrays (memory pressure) and still runs a Python loop over iterations.
 
-The escape condition uses `abs(z) <= 2`, which computes a square root. This is
-acceptable here because Python's built-in `abs()` on a complex scalar calls a
-single C function and is actually faster than spelling out
-`z.real**2 + z.imag**2 <= 4` in pure Python bytecode.
+Note: this implementation records the escape iteration in a slightly different convention (0-based `n` for escaped points), while the naive/numba implementations record 1-based `n`. Comparisons in the scaling analysis are adjusted to account for this.
 
-### 2.2 Vectorized (NumPy)
+### 2.3 Numba CPU (`@njit`)
 
-```python
-C = X + Y * 1j                          # complex grid, all at once
-Z = np.zeros(C.shape, dtype=complex)
-mask = np.ones(C.shape, dtype=bool)
+Compiles a scalar nested-loop implementation to native code. This keeps the per-pixel `while` loop structure (early exit when escaped) but removes Python overhead. A small warm-up call is used so compilation time is excluded from timings.
 
-for n in range(max_iter):
-    Z[mask] = Z[mask] ** 2 + C[mask]
-    escape = mask & (np.abs(Z) > 2)
-    mandelbrot_set[escape] = n
-    mask[escape] = False
-```
+### 2.4 Multiprocessing CPU
 
-Instead of looping pixel by pixel, the entire grid is stored as a NumPy array and
-updated in one operation per iteration step. A boolean `mask` tracks which pixels
-have not yet escaped, so escaped pixels are dropped from further computation.
+Splits the image into row-blocks (chunks) and computes each chunk with a vectorized block function in multiple processes. This can speed up large grids but has overhead (process startup/IPC and assembling blocks).
 
-The escape check uses `np.abs(Z) > 2`.
-Over a large array `Z.real**2 + Z.imag**2 > 4` may give computing a square root for every element
-a genuine speedup at the NumPy level.
+### 2.5 Dask local CPU
 
-The outer `for n in range(max_iter)` loop is still Python, but each pass processes
-all active pixels at once using NumPy's C-compiled array operations.
+Uses `dask.array.map_blocks` with a block function that computes a chunk of rows. This provides a high-level parallel programming model but introduces scheduling overhead, especially for smaller problem sizes.
 
-### 2.3 Numba (JIT-compiled)
+### 2.6 CUDA GPU (Numba `@cuda.jit`)
 
-```python
-@njit
-def numba(xmin, xmax, ymin, ymax, height, width, max_iter):
-    for i in range(height):
-        for j in range(width):
-            c = complex(x[j], y[i])
-            z = complex(0, 0)
-            n = 0
-            while n < max_iter and (z.real**2 + z.imag**2) <= 4:
-                z = z * z + c
-                n += 1
-            mandelbrot_set[i, j] = n
-```
+Implements a 2D CUDA kernel where each thread computes one pixel.
 
-The `@njit` decorator from Numba compiles the function to native machine code the
-first time it is called (just-in-time compilation). The code structure is identical
-to the Naive version - nested loops, scalar arithmetic - but it runs at C-like speed.
+Important CUDA details (also discussed in the notes):
 
-Here the `z.real**2 + z.imag**2 <= 4` check *does* pay off: in compiled code,
-avoiding a square root is a concrete gain. Similarly, `z * z` is used instead of
-`z ** 2` to avoid the overhead of a general power function.
+- Explicit grid and block configuration:
+  `blocks_per_grid = ((H + tx - 1)//tx, (W + ty - 1)//ty)`
+- Out-of-bounds guard in the kernel.
+- No shared memory is needed for the core Mandelbrot kernel because pixels are independent.
+- Kernel timing uses CUDA events (kernel-only time) and a separate end-to-end measurement that includes H2D/D2H transfers.
 
-Because compilation happens on the first call, a **warm-up run** is performed before
-any timing begins.
-
----
 
 ## 3. Benchmarking Methodology
 
-- **Grid sizes:** 64, 128, 256, 512, 1024, 2048, 4096 (each an NxN grid).
-  The Naive method is included at all sizes but becomes very slow at the largest.
-- **Timing:** `time.perf_counter()` - wall-clock time with the highest resolution
-  available on the system.
-- **Single run per size:** one timed execution per (method, size) combination.
-  The Naive method is deterministic and its runtimes are very stable, so a single
-  measurement is representative.
-- **Numba warm-up:** the JIT compiler is triggered on a tiny 32x32 grid before any
-  measurements, so compilation time is excluded from the results.
-- **Results saved:** all timings are written to `benchmark_results.csv` alongside
-  derived throughput (million pixels per second).
+### 3.1 Timing
 
----
+- CPU methods are timed with `time.perf_counter()` and reported as the **median** over `repeat` runs.
+- CUDA is timed in two ways:
+  - **Kernel-only:** CUDA events (`start.record()`, `end.record()`, `end.synchronize()`)
+  - **End-to-end:** host timer around H2D + kernel + D2H and `cuda.synchronize()`
+- Warm-up runs are used to exclude JIT compilation time (Numba CPU and Numba CUDA).
+
+### 3.2 Scaling experiment design
+
+To demonstrate a clear GPU advantage and reach problem sizes where CPU becomes slow:
+
+- **Small → mid sweep:** N = 128, 256, 512, 1024, 2048, 4096 with `repeat=3`.
+  - Naive is included only up to N=512.
+  - NumPy vectorized is included up to N=4096.
+- **Large sweep:** N = 6144, 8192, 12288 with `repeat=1`.
+  - Naive and full-grid NumPy vectorized are skipped.
+
+### 3.3 Experimental data (deliverable)
+
+All timing measurements used in the scaling analysis are stored in:
+
+- [benchmark_outputs/scaling_analysis_timings.csv](benchmark_outputs/scaling_analysis_timings.csv)
+
+This file contains all (method, size) timings across both the small/mid sweep and the large sweep.
+
 
 ## 4. Experimental Results
 
-### 4.1 Raw timings (seconds)
+### 4.1 Scaling plots
 
-| Grid size | Pixels | Naive (s) | Vectorized (s) | Numba (s) |
-|-----------|--------|-----------|----------------|-----------|
-| 64x64 | 4 096 | 0.0327 | 0.0029 | 0.0004 |
-| 128x128 | 16 384 | 0.1282 | 0.0082 | 0.0015 |
-| 256x256 | 65 536 | 0.5175 | 0.0346 | 0.0062 |
-| 512x512 | 262 144 | 2.0653 | 0.1262 | 0.0269 |
-| 1024x1024 | 1 048 576 | 5.6283 | 0.7288 | 0.1001 |
-| 2048x2048 | 4 194 304 | 25.8827 | 3.7981 | 0.3874 |
-| 4096x4096 | 16 777 216 | 103.1887 | 16.7817 | 1.5300 |
+- Small → mid scaling plot: [benchmark_outputs/scaling_cuda_r3_fixed/scaling_times.png](benchmark_outputs/scaling_cuda_r3_fixed/scaling_times.png)
+- Large scaling plot: [benchmark_outputs/scaling_cuda_large_r1/scaling_times.png](benchmark_outputs/scaling_cuda_large_r1/scaling_times.png)
 
-### 4.2 Speedup over Naive
+### 4.2 Representative timings and speedups
 
-| Grid size | Vectorized speedup | Numba speedup |
-|-----------|--------------------|---------------|
-| 64x64 | 11x | 83x |
-| 512x512 | 16x | 77x |
-| 4096x4096 | 6x | 67x |
+All numbers below come from the scaling CSVs (medians where applicable).
 
----
+| N (NxN) | cpu_numba (s) | cpu_numpy_vectorized (s) | cpu_multiprocessing_p8 (s) | cpu_dask_processes_w4 (s) | cuda_kernel_float32_16x8 (s) | cuda_e2e_float32_16x8 (s) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1024 | 0.139315 | 0.684437 | 0.614072 | 0.955336 | 0.000926 | 0.001612 |
+| 4096 | 2.275016 | 17.586730 | 1.796750 | 3.880975 | 0.010801 | 0.016401 |
+| 12288 | 20.354264 | – | 14.138216 | 26.164792 | 0.094814 | 0.153619 |
 
-## 5. Interpretation
+Speedups vs `cpu_numba` at N=12288:
 
-### Why is Naive so slow?
+- CUDA kernel-only: 20.354264 / 0.094814 ≈ 214.68×
+- CUDA end-to-end: 20.354264 / 0.153619 ≈ 132.50×
+- cpu_multiprocessing_p8: 20.354264 / 14.138216 ≈ 1.44×
+- cpu_dask_processes_w4: 20.354264 / 26.164792 ≈ 0.78×
 
-Python executes each operation one at a time through its interpreter. Every
-arithmetic step - `z ** 2`, `z + c`, `abs(z)` - involves Python object
-allocation, type checking, and function dispatch. For a 4096x4096 grid with
-up to 256 iterations per pixel, this adds up to billions of such overhead events.
 
-### Why does Vectorized help?
+## 5. Reasoning and Interpretation
 
-NumPy moves the inner arithmetic into compiled C/Fortran code. A single call like
-`Z[mask] ** 2 + C[mask]` processes millions of values in a tight C loop with no
-Python overhead per element. The outer `for n in range(max_iter)` loop is still
-Python, but it runs at most 256 times regardless of grid size - so its cost is
-negligible.
+### 5.1 Why CUDA is so fast here
 
-The vectorized approach is still not ideal because it cannot exit early for a
-pixel once it escapes. It always runs `max_iter` outer iterations (operating on a
-shrinking set of active pixels). Numba's per-pixel `while` loop can stop as soon
-as a point escapes.
+Mandelbrot is embarrassingly parallel at the pixel level: each thread performs scalar arithmetic and writes one output value. The GPU can schedule many thousands of threads, hiding latency and delivering very high throughput.
 
-### Why is Numba the fastest?
+### 5.2 Kernel-only vs end-to-end
 
-Numba compiles the exact same loop structure as the Naive version to native machine
-code. The CPU can execute it with full SIMD and branch-prediction optimisation,
-just like a hand-written C program. Additionally, Numba's per-pixel `while` loop
-exits early when a point escapes, skipping all remaining iterations - something
-the vectorized version cannot do per-pixel. The near-constant throughput across
-all grid sizes shows that Numba is not bottlenecked by memory or Python overhead;
-it is purely compute-limited.
+For CUDA, the difference between kernel-only and end-to-end time is the host-device transfer overhead (PCIe + driver overhead). Reporting both avoids an unfair comparison between “GPU compute only” and “CPU full pipeline”.
 
-### Scaling behaviour
+### 5.3 Why multiprocessing/Dask help only at large N
 
-All three methods scale approximately as **O(N^2)** - doubling the grid size
-quadruples the number of pixels and therefore roughly quadruples the runtime.
-This is visible in the log-log plot as straight, parallel lines. The difference
-between methods is a constant factor (the slope is the same; the intercept differs),
-not a difference in algorithmic complexity.
+For small N, multiprocessing and Dask are dominated by overhead (process management and scheduling). As N grows, compute starts to dominate and multiprocessing can overtake single-process CPU Numba (e.g., at N=4096 and above in the measurements).
 
----
+### 5.4 Divergence
+
+Near the Mandelbrot boundary, different pixels escape at different iteration counts, so warps contain threads that execute different loop trip counts (warp divergence). This reduces GPU efficiency relative to an ideal uniform workload, but is inherent to the algorithm.
+
+### 5.5 Correctness and floating point precision
+
+- CPU implementations largely agree. Tiny mismatch ratios can occur at large sizes (on the order of $10^{-6}$ vs the CPU Numba reference), which mainly affects boundary pixels.
+- CUDA uses float32 coordinates for performance. In the scaling runs, CUDA float32 shows a small but consistent mismatch ratio vs the float64 CPU Numba reference of about 0.12–0.13% (e.g., 0.00124 at N=1024 and 0.00128 at N=4096/12288). Switching CUDA coordinate arrays to float64 eliminates mismatches but may reduce GPU performance.
+
 
 ## 6. Conclusion
 
-| Method | Best for | Drawback |
-|--------|----------|----------|
-| Naive | Easy to implement | Very slow |
-| Vectorized | No extra dependencies | Memory pressure at large sizes |
-| Numba | Production speed | Requires compilation warm-up |
-
-For interactive or production use, Numba is the clear winner - roughly **70x faster**
-than Naive and **10x faster** than vectorized at typical grid sizes, with no change
-to the algorithm's logic. Vectorized NumPy is a good middle ground when Numba is not
-available or the grid is small.
+- CPU Numba is a strong baseline and scales predictably with $N^2$.
+- Multiprocessing can help at larger N but has overhead that makes it worse than single-process Numba at smaller N.
+- Dask (local) adds additional scheduling overhead and only becomes competitive for sufficiently large workloads and careful chunking.
+- CUDA provides the clearest advantage: at N=12288, CUDA is >100× faster end-to-end than CPU Numba in the measured setup.
