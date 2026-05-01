@@ -21,6 +21,24 @@
 
 # Mandelbrot Set – CPU vs CUDA Performance & Scaling Report
 
+## 0. Environment and reproducibility
+
+This report is based on runs executed on a CUDA-capable node with:
+
+- GPU: NVIDIA L40S (from `nvidia-smi -L`)
+- Python: 3.10.12
+- NumPy: 2.2.6
+- Numba: 0.65.1
+- Numba CUDA available: `True`
+
+Re-run the main experiments (example commands):
+
+- CUDA block-size sweep (writes `benchmark_outputs/cuda_blocksize_scan.csv` + `.png`):
+  - `.venv/bin/python mini_project_1/cuda_numba_benchmark.py --size 2048 --max-iter 256 --repeat 3 --out-dir benchmark_outputs`
+- Scaling comparison (writes `scaling_times.csv` + `scaling_times.png` under the chosen output folder):
+  - `.venv/bin/python mini_project_1/scaling_cuda_compare.py --sizes 128,256,512,1024,2048,4096 --max-iter 256 --repeat 3 --out-dir benchmark_outputs/scaling_cuda_r3_fixed --cuda-block 16x8 --cuda-coord-dtype float32`
+  - `.venv/bin/python mini_project_1/scaling_cuda_compare.py --sizes 6144,8192,12288 --max-iter 256 --repeat 1 --out-dir benchmark_outputs/scaling_cuda_large_r1 --skip-vectorized --cuda-block 16x8 --cuda-coord-dtype float32`
+
 ## 1. The Problem
 
 The Mandelbrot set is a classic fractal defined in the complex plane. For each point $c = x + iy$, we apply the iteration
@@ -29,7 +47,7 @@ $$z_{n+1} = z_n^2 + c, \quad z_0 = 0$$
 
 and say that a point belongs to the set if $|z|$ never exceeds 2. In practice we cap the iteration count with `max_iter` and record the number of iterations before escape (or `max_iter` if it never escaped).
 
-Mandelbrot is a good HPC benchmark because the work is embarrassingly parallel at the pixel level (each pixel is independent), while still having branch divergence (different pixels escape after different iteration counts).
+In this project, Mandelbrot is useful as a performance and scaling workload because each pixel can be computed independently (parallel-friendly), while still showing control-flow divergence near the set boundary (different pixels escape after different iteration counts).
 
 **Common configuration used in the experiments:**
 
@@ -136,13 +154,13 @@ Speedups vs `cpu_numba` at N=12288:
 
 ## 5. Reasoning and Interpretation
 
-### 5.1 Why CUDA is so fast here
+### 5.1 Why CUDA is fast here (in these measurements)
 
-Mandelbrot is embarrassingly parallel at the pixel level: each thread performs scalar arithmetic and writes one output value. The GPU can schedule many thousands of threads, hiding latency and delivering very high throughput.
+Each CUDA thread computes one pixel (scalar arithmetic + one output write). With a large grid, the GPU can keep many warps in flight and hide latency, which is why the CUDA kernel time stays far below CPU times for larger N.
 
 ### 5.2 Kernel-only vs end-to-end
 
-For CUDA, the difference between kernel-only and end-to-end time is the host-device transfer overhead (PCIe + driver overhead). Reporting both avoids an unfair comparison between “GPU compute only” and “CPU full pipeline”.
+For CUDA, the difference between kernel-only and end-to-end time is the host-device transfer overhead (H2D and D2H). Reporting both separates GPU compute from transfer overhead.
 
 ### 5.3 Why multiprocessing/Dask help only at large N
 
