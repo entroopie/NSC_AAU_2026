@@ -1,3 +1,93 @@
+2026-05-01 f688425 -
+
+ .gitignore | 5 +++++
+ 1 file changed, 5 insertions(+)
+2026-05-01 b8465e5 update report
+
+ report.md | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+2026-05-01 6414213 add comparing file
+
+ mini_project_1/scaling_cuda_compare.py | 361 +++++++++++++++++++++++++++++++++
+ 1 file changed, 361 insertions(+)
+2026-05-01 9cb2c02 add report
+
+ report.md | 292 +++++++++++++++++++++++++++-----------------------------------
+ 1 file changed, 126 insertions(+), 166 deletions(-)
+2026-05-01 ac31901 add cuda notes
+
+ mini_project_1/cuda_notes.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+2026-05-01 1893152 add benchmark outputs
+
+ benchmark_outputs/cuda_blocksize_scan.csv          |   7 +++
+ benchmark_outputs/cuda_blocksize_scan.png          | Bin 0 -> 63151 bytes
+ benchmark_outputs/mandelbrot_cuda_preview.png      | Bin 0 -> 231929 bytes
+ .../perf_compare_1024/cuda_blocksize_scan.csv      |   7 +++
+ .../perf_compare_1024/cuda_blocksize_scan.png      | Bin 0 -> 58842 bytes
+ .../perf_compare_1024/dask_local_chunk_scan.csv    |   5 ++
+ .../multiprocessing_best_by_p.csv                  |   5 ++
+ .../multiprocessing_chunk_scan.csv                 |  17 +++++++
+ .../perf_compare_1024_r5/comparison_summary.csv    |   6 +++
+ .../perf_compare_1024_r5/cuda_blocksize_scan.csv   |   7 +++
+ .../perf_compare_1024_r5/cuda_blocksize_scan.png   | Bin 0 -> 58189 bytes
+ .../cuda_precision_mismatch.csv                    |   3 ++
+ .../perf_compare_1024_r5/dask_local_chunk_scan.csv |   4 ++
+ .../multiprocessing_best_by_p.csv                  |   5 ++
+ .../multiprocessing_chunk_scan.csv                 |  13 +++++
+ benchmark_outputs/scaling_analysis_timings.csv     |  55 +++++++++++++++++++++
+ .../scaling_cuda_large_r1/scaling_times.csv        |  16 ++++++
+ .../scaling_cuda_large_r1/scaling_times.png        | Bin 0 -> 95285 bytes
+ .../scaling_cuda_r3/scaling_times.csv              |  40 +++++++++++++++
+ .../scaling_cuda_r3/scaling_times.png              | Bin 0 -> 153135 bytes
+ .../scaling_cuda_r3_fixed/scaling_times.csv        |  40 +++++++++++++++
+ .../scaling_cuda_r3_fixed/scaling_times.png        | Bin 0 -> 150682 bytes
+ 22 files changed, 230 insertions(+)
+2026-04-26 710b9c3 add initial cuda functions
+
+ mini_project_1/cuda_notes.md           |  46 ++++++
+ mini_project_1/cuda_numba_benchmark.py | 251 +++++++++++++++++++++++++++++++++
+ 2 files changed, 297 insertions(+)
+2026-04-26 ef58e1f added docstrings and unit tests
+
+ mini_project_1/test_mandelbrot_unittest.py | 45 ++++++++++++++++++++++++++++++
+ mini_project_1/utils/functions.py          | 44 +++++++++++++++++++++++++++--
+ 2 files changed, 87 insertions(+), 2 deletions(-)
+2026-04-06 f201fe8 include dask conf
+
+ mini_project_1/config.py | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+2026-04-06 9540b95 add dask vec block
+
+ mini_project_1/utils/functions.py | 21 ++++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+2026-04-06 7259933 added multiprocessing and dask to perf analysis
+
+ mini_project_1/parallel_dask_benchmark.py | 330 ++++++++++++++++++++++++++++++
+ mini_project_1/performance_analysis.py    | 114 ++++++++---
+ 2 files changed, 414 insertions(+), 30 deletions(-)
+2026-04-06 ca30d16 Merge branch 'main' of github.com:entroopie/NSC_AAU_2026
+2026-04-06 ac1064d small adjustments
+
+ mini_project_1/mandelbrot_test.py        | 5 +----
+ mini_project_1/utils/interactive_plot.py | 4 ++--
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+2026-03-11 e8130e0 improve formatting
+
+ report.md | 63 +++++++++++++++++++++++++--------------------------------------
+ 1 file changed, 25 insertions(+), 38 deletions(-)
+2026-03-11 abecb12 moved report to root
+
+ mini_project_1/report.md => report.md | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+2026-03-11 20b94f5 update gitignore
+
+ .gitignore | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+2026-03-11 e32dbdb Added git log
+
+ git_log.txt | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 75 insertions(+)
 2026-03-11 5dd3276 Delete mini_project_1/mandelbrot.py
 
  mini_project_1/mandelbrot.py | 31 -------------------------------
