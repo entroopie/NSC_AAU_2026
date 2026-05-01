@@ -44,3 +44,16 @@ Also, the first launch includes JIT compilation, so do a warm-up run before timi
 Near the Mandelbrot boundary, threads in the same warp run different iteration counts:
 some escape quickly, some keep iterating. This causes warp divergence and reduces SIMD
 efficiency. This is expected behavior for Mandelbrot, not a bug.
+
+## 6) Float32 vs Float64 precision tradeoff
+
+Mandelbrot is numerically sensitive near the set boundary. Small coordinate rounding
+differences can change the escape iteration count for some pixels.
+
+Implication for this project:
+- Using `float32` for `x` and `y` on GPU is usually faster and uses less memory, but can produce small differences vs a CPU baseline that uses `float64`.
+- Using `float64` improves agreement with a `float64` CPU reference, but can reduce performance on many GPUs.
+
+For correctness checks:
+- If exact equality is required (`array_equal`), use matching precision on both CPU and GPU (typically `float64` on both).
+- If the goal is performance-oriented `float32` GPU runs, report mismatch statistics (e.g., mismatch count/ratio) instead of only strict pass/fail.
