@@ -1,7 +1,12 @@
 # Ignore specific project folders
 venv/
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+*.pyo
+*.pyd
+*.so
 Lecture_2_code.ipynb
 exercises/
 reflections.md
